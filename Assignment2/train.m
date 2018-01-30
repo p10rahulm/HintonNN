@@ -24,7 +24,7 @@ init_wt = 0.01;  % Standard deviation of the normal distribution
                  % which is sampled to get the initial weights; default = 0.01
 
 % VARIABLES FOR TRACKING TRAINING PROGRESS.
-show_training_CE_after = 100;
+show_training_CE_after = 1000; % default 100
 show_validation_CE_after = 1000;
 
 % LOAD DATA.
@@ -99,7 +99,11 @@ for epoch = 1:epochs
 
     %% HIDDEN LAYER.
     % FILL IN CODE. Replace the line below by one of the options.
-    embed_to_hid_weights_gradient = zeros(numhid1 * numwords, numhid2);
+    % embed_to_hid_weights_gradient = zeros(numhid1 * numwords, numhid2);
+    % fprintf(1, '\rembed_to_hid_weights_gradient %.3f\n', size(embed_to_hid_weights_gradient));
+    % fprintf(1, '\rembedding_layer_state %.3f\n', size(embedding_layer_state));
+    % fprintf(1, '\rback_propagated_deriv_1 %.3f\n', size(back_propagated_deriv_1));
+    embed_to_hid_weights_gradient = embedding_layer_state * back_propagated_deriv_1';
     % Options:
     % (a) embed_to_hid_weights_gradient = back_propagated_deriv_1' * embedding_layer_state;
     % (b) embed_to_hid_weights_gradient = embedding_layer_state * back_propagated_deriv_1';
@@ -107,7 +111,10 @@ for epoch = 1:epochs
     % (d) embed_to_hid_weights_gradient = embedding_layer_state;
 
     % FILL IN CODE. Replace the line below by one of the options.
-    hid_bias_gradient = zeros(numhid2, 1);
+    % hid_bias_gradient = zeros(numhid2, 1);
+    
+    % -------This is done-------
+    hid_bias_gradient = sum(back_propagated_deriv_1, 2);
     % Options
     % (a) hid_bias_gradient = sum(back_propagated_deriv_1, 2);
     % (b) hid_bias_gradient = sum(back_propagated_deriv_1, 1);
@@ -115,7 +122,11 @@ for epoch = 1:epochs
     % (d) hid_bias_gradient = back_propagated_deriv_1';
 
     % FILL IN CODE. Replace the line below by one of the options.
-    back_propagated_deriv_2 = zeros(numhid2, batchsize);
+    % back_propagated_deriv_2 = zeros(numhid2, batchsize);
+    % fprintf(1, 'back_propagated_deriv_2 %.3f\n', size(back_propagated_deriv_2));
+    % fprintf(1, 'back_propagated_deriv_1 %.3f\n', size(back_propagated_deriv_1));
+    % fprintf(1, 'embed_to_hid_weights %.3f\n', size(embed_to_hid_weights));
+    back_propagated_deriv_2 = embed_to_hid_weights * back_propagated_deriv_1;
     % Options
     % (a) back_propagated_deriv_2 = embed_to_hid_weights * back_propagated_deriv_1;
     % (b) back_propagated_deriv_2 = back_propagated_deriv_1 * embed_to_hid_weights;
