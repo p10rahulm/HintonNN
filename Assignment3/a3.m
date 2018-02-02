@@ -144,8 +144,58 @@ function ret = d_loss_by_d_model(model, data, wd_coefficient)
   % The returned object is supposed to be exactly like parameter <model>, i.e. it has fields ret.input_to_hid and ret.hid_to_class. However, the contents of those matrices are gradients (d loss by d model parameter), instead of model parameters.
 	 
   % This is the only function that you're expected to change. Right now, it just returns a lot of zeros, which is obviously not the correct output. Your job is to replace that by a correct computation.
-  ret.input_to_hid = model.input_to_hid * 0;
-  ret.hid_to_class = model.hid_to_class * 0;
+  % ret.input_to_hid = model.input_to_hid * 0;
+  
+  % First let us get all the outputs, ie do the forward passed
+  i_test = data.inputs;
+  %disp(size(i_test));
+  w_ih = model.input_to_hid;
+  %disp(size(w_ih));
+  z_h = i_test'*w_ih';
+  %disp(size(z_h));
+  output_h = 1./(1+exp(-z_h));
+  %disp(size(output_h));
+  w_hs = model.hid_to_class;
+  %display(size(w_hs));
+  input_to_softmax = output_h*w_hs';
+  %display(size(input_to_softmax));
+  exp_input_to_softmax = exp(input_to_softmax);
+  output_at_softmax = (exp_input_to_softmax)./sum(exp_input_to_softmax,2);
+  
+  %disp(size(output_at_softmax));
+  % display(output_at_softmax(1,:)); %display one row of softmax output
+  % display(sum(output_at_softmax(1,:))); %Check that sum of row is 1;
+  output_at_softmax = output_at_softmax'; %this is because targets are transposed compared to what we calculated
+  targets = data.targets;
+  %disp(size(targets));
+  % disp(targets(:,1)); make sure targets are as expected
+  %disp(size(output_h));
+  outputdiff = (output_at_softmax-targets);
+  %disp(size(outputdiff));
+  %disp(size(outputdiff,2));
+  d_cost_d_w_hs = outputdiff*output_h;
+  d_cost_d_w_hs_avg = d_cost_d_w_hs/size(outputdiff,2);
+  w_d_loss = w_hs*wd_coefficient;
+  %disp(size(w_d_loss));
+  %disp(size(d_cost_d_w_hs_avg));
+  % disp(size(model.hid_to_class)); confirming that the hidden to classifier dimensions are right
+  %ret.hid_to_class = model.hid_to_class * 0;
+  ret.hid_to_class = d_cost_d_w_hs_avg + w_d_loss;
+  
+  %disp(size(outputdiff));
+  %disp(size(w_hs));
+  %disp(size(output_h));
+  %disp(size(i_test));
+  %disp(size( model.input_to_hid));
+  d_cost_d_w_ih = ((outputdiff' * w_hs).*(output_h.*(1-output_h)))' * i_test';
+  d_cost_d_w_ih_avg = d_cost_d_w_ih/size(outputdiff,2);
+  w_d_loss = w_ih*wd_coefficient;
+  %disp(size(d_cost_d_w_ih_avg));
+  %disp(size(w_d_loss));
+  %ret.input_to_hid = model.input_to_hid * 0;
+  % disp(size(model.input_to_hid));
+  ret.input_to_hid = d_cost_d_w_ih_avg + w_d_loss ;
+  
 end
 
 function ret = model_to_theta(model)
@@ -177,4 +227,4 @@ function ret = classification_performance(model, data)
   [dump, choices] = max(class_input); % choices is integer: the chosen class, plus 1.
   [dump, targets] = max(data.targets); % targets is integer: the target class, plus 1.
   ret = mean(double(choices ~= targets));
-end
+end 
