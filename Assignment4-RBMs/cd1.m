@@ -14,6 +14,10 @@ function ret = cd1(rbm_w, visible_data)
     %Goodness_Grad_initial = configuration_goodness_gradient(visible_state2, hidden_state2);
     %Goodness_Grad_final = configuration_goodness_gradient(visible_data, hidden_state);
     %ret = Goodness_Grad_final - Goodness_Grad_initial; 
+    
+    %changing the final hidden state to non sampled: For Q9 onwards. else just comment out below line
+    visible_data = sample_bernoulli(visible_data);
+    
     %changing the final hidden state to non sampled
     hidden_state = sample_bernoulli(visible_state_to_hidden_probabilities(rbm_w, visible_data));
     %disp(size(hidden_state));
@@ -24,5 +28,6 @@ function ret = cd1(rbm_w, visible_data)
     Goodness_Grad_initial = configuration_goodness_gradient(visible_state2, hidden_state2);
     Goodness_Grad_final = configuration_goodness_gradient(visible_data, hidden_state);
     ret = Goodness_Grad_final - Goodness_Grad_initial; 
+    
     
 end
